@@ -28,6 +28,19 @@ void str_copy(String *src, String *dest)
     dest->data[dest->len] = '\0';
 }
 
+void str_copy_i8ptr(i8 *src, String *dest)
+{
+    int i = 0;
+    while (src[i] != '\0')
+    {
+        dest->data[i] = src[i];
+        i++;
+    }
+
+    dest->data[i] = '\0';
+    dest->len = i;
+}
+
 void str_strip(String *str, i8 *c)
 {
     str->data[strcspn(str->data, c)] = 0;
