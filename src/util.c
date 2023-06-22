@@ -1,5 +1,6 @@
-#include "globals.h"
+#include "string.h"
 
+#include "globals.h"
 #include "util.h"
 
 void str_set_len(String *str)
@@ -25,6 +26,11 @@ void str_copy(String *src, String *dest)
     }
 
     dest->data[dest->len] = '\0';
+}
+
+void str_strip(String *str, i8 *c)
+{
+    str->data[strcspn(str->data, c)] = 0;
 }
 
 i32 str_find_char(String *str, u8 c)

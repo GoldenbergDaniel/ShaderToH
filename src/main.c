@@ -17,6 +17,8 @@ i32 main(void)
     {
         lines[i].data = (char*) malloc(sizeof(char)*10);
         strcpy(lines[i].data, buffer);
+        str_strip(&lines[i], "\n");
+        str_set_len(&lines[i]);
         i++;
     }
 

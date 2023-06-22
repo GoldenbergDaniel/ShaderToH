@@ -8,6 +8,7 @@ typedef struct String
 
 // String *str_alloc(u32 len);
 void str_set_len(String *str);
-i32 str_find_char(String *str, u8 c);
 void str_copy(String *src, String *dest);
+void str_strip(String *str, i8 *c);
+i32 str_find_char(String *str, u8 c);
 // void str_free(String *str);
