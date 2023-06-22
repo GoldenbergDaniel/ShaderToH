@@ -1,5 +1,5 @@
 NAME = Parser
-CFLAGS = -std=c17 -O0 -Wall -Wpedantic
+CFLAGS = -std=c17 -Wall -Wpedantic
 CC = cc
 
 all:

@@ -16,7 +16,7 @@ void str_set_len(String *str)
     str->len = len;
 }
 
-void str_copy(String *src, String *dest)
+void str_copy_string(String *dest, String *src)
 {
     dest->len = src->len;
 
@@ -28,17 +28,17 @@ void str_copy(String *src, String *dest)
     dest->data[dest->len] = '\0';
 }
 
-void str_copy_i8ptr(i8 *src, String *dest)
+void str_copy_buffer(String *str, i8 *buffer)
 {
     int i = 0;
-    while (src[i] != '\0')
+    while (buffer[i] != '\0')
     {
-        dest->data[i] = src[i];
+        str->data[i] = buffer[i];
         i++;
     }
 
-    dest->data[i] = '\0';
-    dest->len = i;
+    str->data[i] = '\0';
+    str->len = i;
 }
 
 void str_strip(String *str, i8 *c)
