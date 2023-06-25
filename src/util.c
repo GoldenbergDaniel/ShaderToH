@@ -38,12 +38,12 @@ void str_copy_string(String *dest, String *src)
     }
 }
 
-void str_copy_buffer(String *str, i8 *buffer)
+void str_copy_buffer(String *str, i8 *buf)
 {
-    int i = 0;
-    while (buffer[i] != '\0')
+    i32 i = 0;
+    while (buf[i] != '\0')
     {
-        str->data[i] = buffer[i];
+        str->data[i] = buf[i];
         i++;
     }
 
@@ -69,3 +69,15 @@ i32 str_find_char(String *str, u8 c)
 
     return -1;
 }
+
+u32 buffer_len(i8 *buf)
+{
+    i32 i = 0;
+    while (buf[i] != '\0')
+    {
+        i++;
+    }
+
+    return i;
+}
+
