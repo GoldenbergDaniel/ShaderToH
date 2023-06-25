@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.h": "c",
+        "sstream": "c",
+        "array": "c",
+        "span": "c",
+        "vector": "c",
+        "string": "c",
+        "string_view": "c"
+    }
+}
