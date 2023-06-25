@@ -9,5 +9,9 @@ all:
 compile:
 	@$(CC) $(SOURCES) $(CFLAGS) -o $(NAME)
 
+test:
+	cd debug; \
+	cc ../src/*.c -g
+
 run:
 	@./$(NAME)

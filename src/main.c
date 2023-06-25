@@ -1,22 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "globals.h"
 #include "util.h"
 
-void read_lines(FILE *file, String *lines, u16 size);
+void read_lines(FILE *file, String *lines, u16 count);
 
 i32 main(void)
 {
-    FILE *file = fopen("data.txt", "r");
-    u64 line_count = 588;
-    String lines[line_count];
+    FILE *file = fopen("data.ini", "r");
+    assert(file != NULL);
 
-    read_lines(file, lines, 10);
+    u64 line_count = 10;
+    String lines[line_count];
 
     for (u64 i = 0; i < line_count; i++)
     {
-        print_str("", lines[i].data);
+        lines[i].data = NULL;
+    }
+
+    read_lines(file, lines, line_count);
+
+    for (u64 i = 0; i < line_count; i++)
+    {
+        if (lines[i].data == NULL) break;
+
+        printf("%s\n", lines[i].data);
     }
 
     fclose(file);
@@ -24,17 +34,18 @@ i32 main(void)
     return 0;
 }
 
-void read_lines(FILE *file, String *data, u16 size)
+void read_lines(FILE *stream, String *data, u16 count)
 {
-    i8 *buffer = (i8*) malloc(sizeof(i8) * size);
+    i8 *buffer = (i8*) malloc(BUFFER_SIZE);
     u64 i = 0;
 
-    while (fgets((i8*) buffer, sizeof(buffer), file) != NULL)
+    while (fgets(buffer, BUFFER_SIZE, stream) != NULL)
     {
-        data[i].data = (i8*) malloc(sizeof(i8) * 10);
+        if (i == count) break;
+
+        data[i].data = (i8*) malloc(BUFFER_SIZE);
         str_copy_buffer(&data[i], buffer);
         str_strip(&data[i], "\n");
-        str_set_len(&data[i]);
         i++;
     }
 

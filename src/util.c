@@ -1,31 +1,41 @@
-#include "string.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "globals.h"
 #include "util.h"
 
 void str_set_len(String *str)
 {
-    i32 len = 0;
     i32 i = 0;
     while (str->data[i] != '\0')
     {
-        len++;
         i++;
     }
 
-    str->len = len;
+    str->len = i+1;
+}
+
+void str_add_terminator(String *str)
+{
+    str->data[str->len] = '\0';
+    printf("Added a null terminator to string %s\n", str->data);
 }
 
 void str_copy_string(String *dest, String *src)
 {
-    dest->len = src->len;
-
     for (i32 i = 0; i < src->len; i++)
     {
         dest->data[i] = src->data[i];
+        printf("%c\n", dest->data[i]);
     }
+    
+    dest->len = src->len;
 
-    dest->data[dest->len] = '\0';
+    if (dest->data[dest->len] != '\0') 
+    {
+        str_add_terminator(dest);
+    }
 }
 
 void str_copy_buffer(String *str, i8 *buffer)
@@ -37,8 +47,12 @@ void str_copy_buffer(String *str, i8 *buffer)
         i++;
     }
 
-    str->data[i] = '\0';
     str->len = i;
+
+    if (str->data[str->len] != '\0') 
+    {
+        str_add_terminator(str);
+    }
 }
 
 void str_strip(String *str, i8 *c)
