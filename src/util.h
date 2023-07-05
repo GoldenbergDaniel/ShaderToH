@@ -6,11 +6,9 @@ typedef struct String
     u32 len;
 } String;
 
-void str_set_len(String *str);
-void str_add_terminator(String *str);
-void str_copy_string(String *dest, String *src);
-void str_copy_buffer(String *str, i8 *buf);
+void str_copy(String *dest, String *src);
+void str_copy_cstr(String *dest, i8 *src);
 void str_strip(String *str, i8 *c);
 i32 str_find_char(String *str, u8 c);
-u32 buffer_len(i8 *buff);
 
+u32 len_cstr(i8 *cstr);

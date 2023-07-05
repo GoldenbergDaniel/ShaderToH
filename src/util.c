@@ -5,64 +5,38 @@
 #include "globals.h"
 #include "util.h"
 
-void str_set_len(String *str)
+void str_copy(String *dest, String *src)
 {
-    i32 i = 0;
-    while (str->data[i] != '\0')
-    {
-        i++;
-    }
-
-    str->len = i+1;
-}
-
-void str_add_terminator(String *str)
-{
-    str->data[str->len] = '\0';
-    printf("Added a null terminator to string %s\n", str->data);
-}
-
-void str_copy_string(String *dest, String *src)
-{
-    for (i32 i = 0; i < src->len; i++)
+    for (u32 i = 0; i < src->len; i++)
     {
         dest->data[i] = src->data[i];
         printf("%c\n", dest->data[i]);
     }
     
     dest->len = src->len;
-
-    if (dest->data[dest->len] != '\0') 
-    {
-        str_add_terminator(dest);
-    }
 }
 
-void str_copy_buffer(String *str, i8 *buf)
+void str_copy_cstr(String *dest, i8 *src)
 {
-    i32 i = 0;
-    while (buf[i] != '\0')
+    u32 i = 0;
+    while (src[i] != '\0')
     {
-        str->data[i] = buf[i];
+        dest->data[i] = src[i];
         i++;
     }
 
-    str->len = i;
-
-    if (str->data[str->len] != '\0') 
-    {
-        str_add_terminator(str);
-    }
+    dest->len = i;
 }
 
 void str_strip(String *str, i8 *c)
 {
     str->data[strcspn(str->data, c)] = 0;
+    str->len--;
 }
 
 i32 str_find_char(String *str, u8 c)
 {
-    for (i32 i = 0; i < str->len; i++)
+    for (u32 i = 0; i < str->len; i++)
     {
         if (str->data[i] == c) return i;
     }
@@ -70,14 +44,13 @@ i32 str_find_char(String *str, u8 c)
     return -1;
 }
 
-u32 buffer_len(i8 *buf)
+u32 len_cstr(i8 *cstr)
 {
-    i32 i = 0;
-    while (buf[i] != '\0')
+    u32 i = 0;
+    while (cstr[i] != '\0')
     {
         i++;
     }
 
     return i;
 }
-
