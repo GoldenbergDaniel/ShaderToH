@@ -5,8 +5,7 @@
 #include "globals.h"
 #include "util.h"
 
-void read_lines(FILE *file, String *lines, u32 count);
-u32 remove_whitespace(String *lines, u32 count);
+void read_lines(FILE *file, String *container, u32 count);
 
 i32 main(void)
 {
@@ -24,50 +23,32 @@ i32 main(void)
 
     read_lines(file, lines, line_count);
 
-    u32 wsc = remove_whitespace(lines, line_count);
-    log_uint("Count: ", wsc);
-
     fclose(file);
-
-    return 0;
 }
 
 void read_lines(FILE *stream, String *container, u32 count)
 {
-    i8 *buffer = (i8*) malloc(BUFFER_SIZE);
-    u32 i = 0;
+    String buf; 
+    buf.data = (i8*) malloc(BUFFER_SIZE);
 
-    while (fgets(buffer, BUFFER_SIZE, stream) != NULL)
+    u32 i = 0;
+    while (fgets(buf.data, BUFFER_SIZE, stream) != NULL)
     {
         if (i == count) break;
 
-        container[i].data = (i8*) malloc(len_cstr(buffer));
-        str_copy_cstr(&container[i], buffer);
-        // str_strip(&container[i], "\n");
-        // printf("%s\n", container[i].data);
+        buf.len = cstr_len(buf.data);
+        str_strip(&buf, "\0");
+
+        if (str_equals(buf, STR_NL)) continue;
+
+        container[i].data = (i8*) malloc(buf.len);
+        str_copy(&container[i], buf);
+        str_strip(&container[i], "\n");
+
+        printf("%s\n", container[i].data);
 
         i++;
     }
 
-    free(buffer);
-}
-
-// TERRIBLE CODE    
-u32 remove_whitespace(String *lines, u32 count)
-{
-    u32 removed = 0;
-
-    for (u32 i = 0; i < count; i++)
-    {   
-        if (lines[i].data == NULL) break;
-
-        printf("%s", lines[i].data);
-
-        if (lines[i].len == 1)
-        {
-            removed++;
-        }
-    }
-
-    return removed;
+    free(buf.data);
 }
