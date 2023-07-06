@@ -1,18 +1,17 @@
 NAME = Parser
 CFLAGS = -std=c17 -Wall -Wextra -Wpedantic
-CIGNORE = -Wno-string-compare
-CC = gcc
+CC = cc
 
 all:
-	@$(CC) src/*.c $(CFLAGS) $(CIGNORE) -o $(NAME)
+	@$(CC) src/*.c $(CFLAGS) -o $(NAME)
 	@./$(NAME)
 
 compile:
-	@$(CC) $(SOURCES) $(CFLAGS) $(CIGNORE) -o $(NAME)
+	@$(CC) src/*.c $(CFLAGS) -o $(NAME)
 
 test:
 	cd debug; \
-	cc ../src/*.c -g
+	$(CC) ../src/*.c -g
 
 run:
 	@./$(NAME)

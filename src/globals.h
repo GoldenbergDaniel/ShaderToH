@@ -1,10 +1,5 @@
 #pragma once
 
-#define BUFFER_SIZE 32
-
-#define TRUE 1
-#define FALSE 0
-
 typedef unsigned char bool;
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -16,6 +11,18 @@ typedef int i32;
 typedef long i64;
 typedef float f32;
 typedef double f64;
+
+#define BUFFER_SIZE 32
+
+#define TRUE 1
+#define FALSE 0
+
+#define AND &
+#define OR |
+#define XOR ^
+#define NOT ~
+#define LSHIFT <<
+#define RSHIFT >>
 
 #define arr_len(arr) (sizeof (arr) / sizeof (arr[0]))
 #define arr_ptr_len(arr) (sizeof (*arr) / sizeof (arr[0]))
