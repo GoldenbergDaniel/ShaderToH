@@ -5,25 +5,21 @@
 #include "globals.h"
 #include "util.h"
 
-void read_lines(FILE *file, String *container, u32 count);
+void read_lines(FILE *stream, String *container, u32 count);
 
 i32 main(void)
 {
     FILE *file = fopen("input/test.ini", "r");
     assert(file != NULL);
 
-    u32 line_count = 10;
+    const u32 line_count = 10;
     String lines[line_count];
-
-    for (u32 i = 0; i < line_count; i++)
-    {
-        lines[i].data = NULL;
-        lines[i].len = 0;
-    }
 
     read_lines(file, lines, line_count);
 
     fclose(file);
+
+    return 0;
 }
 
 void read_lines(FILE *stream, String *container, u32 count)
@@ -37,13 +33,14 @@ void read_lines(FILE *stream, String *container, u32 count)
         if (i == count) break;
 
         buf.len = cstr_len(buf.data);
-        str_strip(&buf, "\0");
 
         if (str_equals(buf, STR_NL)) continue;
 
+        str_strip(&buf, '\0');
+        
         container[i].data = (i8*) malloc(buf.len);
         str_copy(&container[i], buf);
-        str_strip(&container[i], "\n");
+        str_strip(&container[i], '\n');
 
         printf("%s\n", container[i].data);
 

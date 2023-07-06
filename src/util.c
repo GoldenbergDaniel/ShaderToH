@@ -14,10 +14,20 @@ void str_copy(String *dest, String src)
     dest->len = src.len;
 }
 
-void str_strip(String *str, i8 *c)
+bool str_strip(String *str, i8 c)
 {
-    str->data[strcspn(str->data, c)] = 0; // wtf does this do again?
-    str->len--;
+    for (u32 i = str->len; i > 0; i--)
+    {
+        if (str->data[i-1] == c)
+        {
+            str->data[i-1] = 0;
+            str->len--;
+
+            return TRUE;
+        }
+    }
+    
+    return FALSE;
 }
 
 bool str_equals(String str1, String str2)

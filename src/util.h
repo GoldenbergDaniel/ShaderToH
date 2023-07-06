@@ -11,8 +11,8 @@ typedef struct String
 
 // Copies String src to String dest
 void str_copy(String *dest, String src);
-// Strips char c from String str
-void str_strip(String *str, i8 *c);
+// Strips the last occurence of char c from String str
+bool str_strip(String *str, i8 c);
 // Returns true if String str1 is equal to String str2. Otherwise returns false
 bool str_equals(String str1, String str2);
 // Returns the index of the first char in the string. Returns -1 if the char doesn't exist
