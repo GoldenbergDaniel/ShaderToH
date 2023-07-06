@@ -9,7 +9,7 @@ void read_lines(FILE *file, String *container, u32 count);
 
 i32 main(void)
 {
-    FILE *file = fopen("data.ini", "r");
+    FILE *file = fopen("input/test.ini", "r");
     assert(file != NULL);
 
     u32 line_count = 10;

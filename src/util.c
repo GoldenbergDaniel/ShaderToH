@@ -14,18 +14,6 @@ void str_copy(String *dest, String src)
     dest->len = src.len;
 }
 
-void str_copy_cstr(String *dest, i8 *src)
-{
-    u32 i = 0;
-    while (src[i] != '\0')
-    {
-        dest->data[i] = src[i];
-        i++;
-    }
-
-    dest->len = i+1;
-}
-
 void str_strip(String *str, i8 *c)
 {
     str->data[strcspn(str->data, c)] = 0; // wtf does this do again?
