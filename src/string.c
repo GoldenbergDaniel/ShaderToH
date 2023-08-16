@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <string.h>
 
 #include "globals.h"
 #include "string.h"
@@ -22,6 +21,11 @@ void str_free(String *str)
   free(str->data);
 }
 
+String str_lit(i8 *str)
+{
+  return (String) {str, cstr_len(str)};
+}
+
 void str_copy(String *dest, String *src)
 {
   for (u32 i = 0; i < src->len; i++)
@@ -31,6 +35,11 @@ void str_copy(String *dest, String *src)
   
   dest->len = src->len;
 }
+
+// void str_concat(String *dest, String *src)
+// {
+  
+// }
 
 bool str_strip(String *str, i8 c)
 {
@@ -78,14 +87,8 @@ i32 str_find_substr(String str, String substr)
     {
       for (u32 j = 1; j < substr.len; j++)
       {
-        if (str.data[i+j] == substr.data[j])
-        {
-          if (j == substr.len-1) return i;
-        }
-        else
-        {
-          break;
-        }
+        if (str.data[i+j] != substr.data[j]) break;
+        if (j == substr.len-1) return i;
       }
     }
   }
@@ -93,28 +96,12 @@ i32 str_find_substr(String str, String substr)
   return -1;
 }
 
-// NOTE: Works but not good!
-String str_substring(String str, u32 start, u32 end)
-{
-  assert(start >= 0 && start < str.len && end > 0 && end <= str.len && start < end);
+// String str_substring(String str, u32 start, u32 end)
+// {
+//   assert(start >= 0 && start < str.len && end > 0 && end <= str.len && start < end);
 
-  String temp = str_new(NULL, str.len);
-  // String substr;
-
-  for (u32 i = start; i < end; i++)
-  {
-    // temp.data[i] = str.data[i];
-    break;
-  }
-
-  // log_int("i: ", i);
-
-  memcpy(temp.data, &str.data[start], end-start);
-
-  // str_free(&temp);
-
-  return temp;
-}
+//   return (String) {"", 0};
+// }
 
 u32 cstr_len(i8 *cstr)
 {
