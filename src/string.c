@@ -72,7 +72,7 @@ i32 str_find_char(String str, u8 c)
 
 i32 str_find_substr(String str, String substr)
 {
-  for (u32 i = 0; i <= str.len - substr.len; i++)
+  for (u32 i = 0; i < str.len-substr.len+1; i++)
   {
     if (str.data[i] == substr.data[0])
     {
@@ -82,8 +82,10 @@ i32 str_find_substr(String str, String substr)
         {
           if (j == substr.len-1) return i;
         }
-
-        break;
+        else
+        {
+          break;
+        }
       }
     }
   }
