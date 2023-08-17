@@ -1,4 +1,4 @@
-NAME = Parser
+NAME = ParserPack
 CFLAGS = -std=c17 -Wall -Wextra -Wpedantic
 CC = cc
 
@@ -14,4 +14,4 @@ test:
 	$(CC) ../src/*.c -g
 
 run:
-	@./$(NAME)
+	@./$(NAME) $(arg)

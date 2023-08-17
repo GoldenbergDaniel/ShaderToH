@@ -12,35 +12,39 @@ void read_file(FILE *stream, String container[], u32 count);
 
 i32 main(i32 argc, i8 *argv[])
 {
-  // if (argc < 2)
-  // {
-  //   printf("Error: No argument provided.\n");
-  //   return 1;
-  // }
-  // else if (argc > 2)
-  // {
-  //   printf("Error: More than one argument provided.\n");
-  //   return 1;
-  // }
+  if (argc < 2)
+  {
+    printf("Error: No argument provided.\n");
+    return 1;
+  }
+  else if (argc > 2)
+  {
+    printf("Error: More than one argument provided.\n");
+    return 1;
+  }
 
-  FILE *f_in = fopen("input/shader.glsl", "r");
-  assert(f_in != NULL);
+  String path = str_lit(argv[1]);
+  FILE *file = fopen(path.data, "r");
+  assert(file != NULL);
 
   String lines[BUFFER_SIZE];
   init_lines(lines, BUFFER_SIZE);
-  read_file(f_in, lines, BUFFER_SIZE);
+  read_file(file, lines, BUFFER_SIZE);
 
-  fclose(f_in);
+  freopen("input/shaders.glsl", "a", file);
 
-  FILE *f_out = fopen("output/shader.hpp", "w");
-  fputs("const char *shader = \"", f_out);
+  fputs("\n", file);
+  fputs("const char *shader = \"", file);
+  printf("const char *shader = \"");
 
   for (u32 i = 0; (lines[i].data != NULL); i++)
   {
-    fputs(lines[i].data, f_out);
+    fputs(lines[i].data, file);
+    printf("%s", lines[i].data);
   }
 
-  fputs("\";", f_out);
+  fputs("\";", file);
+  printf("\";\n");
 
   return 0;
 }
@@ -69,7 +73,7 @@ void read_file(FILE *stream, String container[], u32 count)
 
     str_strip(&buf, '\0');
     container[i].data = (i8 *) malloc(buf.len);
-    str_copy(&container[i], &buf);
+    str_copy(&container[i], buf);
     str_strip(&container[i], '\n');
     
     i++;

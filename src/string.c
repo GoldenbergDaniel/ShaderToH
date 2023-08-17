@@ -5,41 +5,53 @@
 #include "globals.h"
 #include "string.h"
 
+// Copies source C-string to destination string
+static void cstr_copy(String *dest, i8 *src);
+
 String str_new(i8 *str, u32 len)
 {
   String new_str;
-  new_str.len = len;
   new_str.data = (i8 *) malloc(len);
+  new_str.len = len;
   
-  if (str != NULL) new_str.data = str;
+  if (str != NULL) cstr_copy(&new_str, str);
 
   return new_str;
 }
 
+inline
 void str_free(String *str)
 {
   free(str->data);
 }
 
+inline
 String str_lit(i8 *str)
 {
-  return (String) {str, cstr_len(str)};
+  return (String) {str, cstr_len(str)-1};
 }
 
-void str_copy(String *dest, String *src)
+void str_copy(String *dest, String src)
+{
+  for (u32 i = 0; i < src.len; i++)
+  {
+    dest->data[i] = src.data[i];
+  }
+  
+  dest->len = src.len;
+}
+
+String *str_concat(String *dest, String *src)
 {
   for (u32 i = 0; i < src->len; i++)
   {
-    dest->data[i] = src->data[i];
+    dest->data[i+dest->len] = src->data[i];
   }
-  
-  dest->len = src->len;
-}
 
-// void str_concat(String *dest, String *src)
-// {
-  
-// }
+  dest->len = dest->len + src->len;
+
+  return dest;
+}
 
 bool str_strip(String *str, i8 c)
 {
@@ -112,4 +124,17 @@ u32 cstr_len(i8 *cstr)
   }
 
   return i+1;
+}
+
+static
+void cstr_copy(String *dest, i8 *src)
+{
+  u32 src_len = cstr_len(src)-1;
+
+  for (u32 i = 0; i < src_len; i++)
+  {
+    dest->data[i] = src[i];
+  }
+  
+  dest->len = src_len;
 }

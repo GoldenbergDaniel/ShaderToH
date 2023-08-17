@@ -17,9 +17,9 @@ void str_free(String *str);
 // Returns a string with length calculated automatically.
 String str_lit(i8 *str);
 // Copies source string to destination string
-void str_copy(String *dest, String *src);
+void str_copy(String *dest, String src);
 // Appends source string to destination string
-void str_concat(String *dest, String *src);
+String *str_concat(String *dest, String *src);
 // Removes the last occurence of character from string. 
 // Returns false if doesn't exist
 bool str_strip(String *str, i8 c);
@@ -34,5 +34,5 @@ i32 str_find_substr(String str, String substr);
 // NOTE: Broken! Should return a pointer to the substring??
 String str_substring(String str, u32 start, u32 end);
 
-// Returns the length of a C string (char *)
+// Returns the length of a C-string
 u32 cstr_len(i8 *cstr);
