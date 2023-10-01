@@ -6,9 +6,11 @@
 
 #include "base_string.h"
 
-#define BUFFER_SIZE 256
-
 typedef struct dirent Dirent;
+
+#define INPUT_PATH "input/"
+#define OUTPUT_PATH "input/shaders.h"
+#define BUFFER_SIZE 256
 
 void read_file(FILE *stream, String container[], u32 count, Arena *arena);
 
@@ -28,13 +30,13 @@ i32 main(void)
       continue;
 
     String lines[BUFFER_SIZE] = {0};
-    String path = str_lit("input/");
+    String path = str_lit(INPUT_PATH);
     path = str_concat(path, file_name, &arena);
     path = str_concat(path, str_lit("\0"), &arena);
 
     FILE *file = fopen(path.str, "r");
     read_file(file, lines, BUFFER_SIZE, &arena);
-    file = freopen("output/shaders.h", "a+", file);
+    file = freopen(OUTPUT_PATH, "a+", file);
     ASSERT(file);
 
     fputs("const char *shader = \"", file);
