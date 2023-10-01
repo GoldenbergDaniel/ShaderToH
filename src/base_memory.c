@@ -4,8 +4,6 @@
 #include "base_os.h"
 #include "base_memory.h"
 
-// @Arena ======================================================================
-
 Arena arena_create(u64 size)
 {
   Arena arena;
@@ -44,5 +42,30 @@ void arena_free(Arena *arena, u64 size)
 void arena_clear(Arena *arena)
 {
   arena->used = 0;
-  printf("cleared!\n");
+}
+
+Arena get_scratch(Arena *conflicts[], u8 conflict_count)
+{
+  thread_local Arena scratch_1;
+  thread_local Arena scratch_2;
+  thread_local b8 init = TRUE;
+
+  if (init)
+  {
+    scratch_1 = arena_create(1024);
+    scratch_2 = arena_create(1024);
+    init = FALSE;
+  }
+
+  Arena scratch = scratch_1;
+
+  for (u8 i = 0; i < conflict_count; i++)
+  {
+    if (&scratch_1 == conflicts[i])
+    {
+      scratch = scratch_2;
+    }
+  }
+
+  return scratch;
 }

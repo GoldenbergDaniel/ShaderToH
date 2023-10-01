@@ -6,10 +6,16 @@
 
 static void cstr_copy(String *dest, i8 *src);
 
-inline
 String str_lit(i8 *str)
 {
-  return (String) {str, cstr_len(str)-1};
+  String result = {str, cstr_len(str)-1};
+
+  if (str[0] == '\0')
+  {
+    result.len += 1;
+  }
+
+  return result;
 }
 
 void str_copy(String *dest, String src)
@@ -24,21 +30,21 @@ void str_copy(String *dest, String src)
 
 String str_concat(String str1, String str2, Arena *arena)
 {
-  String new_str = {0};
-  new_str.len = str1.len + str2.len;
-  new_str.str = arena_alloc(arena, new_str.len);
+  String result = {0};
+  result.len = str1.len + str2.len;
+  result.str = arena_alloc(arena, result.len);
 
   for (u32 i = 0; i < str1.len; i++)
   {
-    new_str.str[i] = str1.str[i];
+    result.str[i] = str1.str[i];
   }
 
   for (u32 i = 0; i < str2.len; i++)
   {
-    new_str.str[i+str1.len] = str2.str[i];
+    result.str[i+str1.len] = str2.str[i];
   }
 
-  return new_str;
+  return result;
 }
 
 b8 str_strip(String *str, i8 c)

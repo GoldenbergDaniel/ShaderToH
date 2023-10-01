@@ -12,40 +12,13 @@ typedef struct dirent Dirent;
 
 void read_file(FILE *stream, String container[], u32 count, Arena *arena);
 
-Arena get_scratch(Arena *conflicts[], u8 conflict_count)
-{
-  thread_local Arena scratch_1;
-  thread_local Arena scratch_2;
-  thread_local b8 init = TRUE;
-
-  if (init)
-  {
-    scratch_1 = arena_create(1024);
-    scratch_2 = arena_create(1024);
-    init = FALSE;
-  }
-
-  Arena scratch = scratch_1;
-
-  for (u8 i = 0; i < conflict_count; i++)
-  {
-    if (&scratch_1 == conflicts[i])
-    {
-      scratch = scratch_2;
-    }
-  }
-
-  return scratch;
-}
-
 i32 main(void)
 {
   Arena arena = arena_create(1024);
-  DIR *inputs_dir = opendir("../input");
+  DIR *inputs_dir = opendir("input");
   ASSERT(inputs_dir);
 
-  printf("Parsed files:\n");
-
+  u8 count = 0;
   for (Dirent *f; (f = readdir(inputs_dir));)
   {
     String file_name = {f->d_name, f->d_namlen};
@@ -54,12 +27,14 @@ i32 main(void)
         str_equals(file_name, str_lit("..")) )
       continue;
 
-    String path = str_concat(str_lit("../input/"), file_name, &arena);
-    str_print(path);
     String lines[BUFFER_SIZE] = {0};
+    String path = str_lit("input/");
+    path = str_concat(path, file_name, &arena);
+    path = str_concat(path, str_lit("\0"), &arena);
+
     FILE *file = fopen(path.str, "r");
     read_file(file, lines, BUFFER_SIZE, &arena);
-    file = freopen("../output/shaders.h", "a+", file);
+    file = freopen("output/shaders.h", "a+", file);
     ASSERT(file);
 
     fputs("const char *shader = \"", file);
@@ -71,9 +46,11 @@ i32 main(void)
 
     fputs("\";\n", file);
 
-    // BUG: Creates a seg fault for some reason
-    // arena_clear(&arena);
+    arena_clear(&arena);
+    count++;
   }
+
+  printf("Parsed %i files!\n", count);
 
   return 0;
 }
@@ -104,5 +81,5 @@ void read_file(FILE *stream, String container[], u32 count, Arena *arena)
     }
   }
 
-//  arena_clear(&scratch);
+ arena_clear(&scratch);
 }
