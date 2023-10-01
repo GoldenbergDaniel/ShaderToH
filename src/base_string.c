@@ -2,7 +2,7 @@
 
 #include "base_common.h"
 #include "base_memory.h"
-#include "string.h"
+#include "base_string.h"
 
 static void cstr_copy(String *dest, i8 *src);
 

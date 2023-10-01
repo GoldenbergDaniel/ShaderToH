@@ -4,7 +4,7 @@
 #include "base_common.h"
 #include "base_memory.h"
 
-#include "string.h"
+#include "base_string.h"
 
 #define BUFFER_SIZE 256
 
