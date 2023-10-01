@@ -1,29 +1,10 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 
-#include "globals.h"
+#include "base_common.h"
+#include "base_memory.h"
 #include "string.h"
 
-// Copies source C-string to destination string
 static void cstr_copy(String *dest, i8 *src);
-
-String str_new(i8 *str, u32 len)
-{
-  String new_str;
-  new_str.data = (i8 *) malloc(len);
-  new_str.len = len;
-  
-  if (str != NULL) cstr_copy(&new_str, str);
-
-  return new_str;
-}
-
-inline
-void str_free(String *str)
-{
-  free(str->data);
-}
 
 inline
 String str_lit(i8 *str)
@@ -35,77 +16,106 @@ void str_copy(String *dest, String src)
 {
   for (u32 i = 0; i < src.len; i++)
   {
-    dest->data[i] = src.data[i];
+    dest->str[i] = src.str[i];
   }
   
   dest->len = src.len;
 }
 
-String *str_concat(String *dest, String *src)
+String str_concat(String str1, String str2, Arena *arena)
 {
-  for (u32 i = 0; i < src->len; i++)
-  {
-    dest->data[i+dest->len] = src->data[i];
-  }
-
-  dest->len = dest->len + src->len;
-
-  return dest;
-}
-
-bool str_strip(String *str, i8 c)
-{
-  for (u32 i = str->len; i > 0; i--)
-  {
-    if (str->data[i-1] == c)
-    {
-      str->data[i-1] = 0;
-      str->len--;
-
-      return TRUE;
-    }
-  }
-  
-  return FALSE;
-}
-
-bool str_equals(String str1, String str2)
-{
-  if (str1.len != str2.len) return FALSE;
+  String new_str = {0};
+  new_str.len = str1.len + str2.len;
+  new_str.str = arena_alloc(arena, new_str.len);
 
   for (u32 i = 0; i < str1.len; i++)
   {
-    if (str1.data[i] != str2.data[i]) return FALSE;
+    new_str.str[i] = str1.str[i];
   }
 
-  return TRUE;
+  for (u32 i = 0; i < str2.len; i++)
+  {
+    new_str.str[i+str1.len] = str2.str[i];
+  }
+
+  return new_str;
 }
 
-i32 str_find_char(String str, u8 c)
+b8 str_strip(String *str, i8 c)
 {
-  for (u32 i = 0; i < str.len; i++)
+  b8 exists = FALSE;
+
+  for (u32 i = str->len; i > 0; i--)
   {
-    if (str.data[i] == c) return i;
+    if (str->str[i-1] == c)
+    {
+      str->str[i-1] = 0;
+      str->len--;
+      exists = TRUE;
+      break;
+    }
+  }
+  
+  return exists;
+}
+
+b8 str_equals(String str1, String str2)
+{
+  if (str1.len != str2.len) return FALSE;
+
+  b8 equals = TRUE;
+
+  for (u32 i = 0; i < str1.len; i++)
+  {
+    if (str1.str[i] != str2.str[i])
+    {
+      equals = FALSE;
+      break;
+    }
   }
 
-  return -1;
+  return equals;
+}
+
+i32 str_find_char(String str, i8 c)
+{
+  i32 loc = -1;
+
+  for (u32 i = 0; i < str.len; i++)
+  {
+    if (str.str[i] == c)
+    {
+      loc = i;
+      break;
+    }
+  }
+
+  return loc;
 }
 
 i32 str_find_substr(String str, String substr)
 {
+  i32 loc = -1;
+
   for (u32 i = 0; i < str.len-substr.len+1; i++)
   {
-    if (str.data[i] == substr.data[0])
+    if (str.str[i] == substr.str[0])
     {
       for (u32 j = 1; j < substr.len; j++)
       {
-        if (str.data[i+j] != substr.data[j]) break;
-        if (j == substr.len-1) return i;
+        if (str.str[i+j] != substr.str[j]) break;
+
+        if (j == substr.len-1)
+        {
+          loc = i;
+          goto end;
+        }
       }
     }
   }
 
-  return -1;
+  end:
+  return loc;
 }
 
 // String str_substring(String str, u32 start, u32 end)
@@ -115,26 +125,32 @@ i32 str_find_substr(String str, String substr)
 //   return (String) {"", 0};
 // }
 
-u32 cstr_len(i8 *cstr)
+void str_print(String str)
 {
-  u32 i = 0;
-  while (cstr[i] != '\0')
+  for (u32 i = 0; i < str.len; i++)
   {
-    i++;
+    printf("%c", str.str[i]);
   }
 
-  return i+1;
+  printf("\n");
+}
+
+u32 cstr_len(i8 *cstr)
+{
+  u32 len = 0;
+  for (; cstr[len]; len++);
+
+  return len+1;
 }
 
 static
 void cstr_copy(String *dest, i8 *src)
 {
-  u32 src_len = cstr_len(src)-1;
-
-  for (u32 i = 0; i < src_len; i++)
+  u32 len = cstr_len(src)-1;
+  for (u32 i = 0; i < len; i++)
   {
-    dest->data[i] = src[i];
+    dest->str[i] = src[i];
   }
   
-  dest->len = src_len;
+  dest->len = len;
 }

@@ -1,5 +1,5 @@
 NAME = ParserPack
-CFLAGS = -std=c17 -Wall -Wextra -Wpedantic
+CFLAGS = -std=c17
 CC = cc
 
 all:
