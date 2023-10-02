@@ -46,14 +46,14 @@ void arena_clear(Arena *arena)
 
 Arena get_scratch(Arena *conflicts[], u8 conflict_count)
 {
-  thread_local Arena scratch_1;
-  thread_local Arena scratch_2;
-  thread_local b8 init = TRUE;
+  static thread_local Arena scratch_1;
+  static thread_local Arena scratch_2;
+  static thread_local b8 init = TRUE;
 
   if (init)
   {
-    scratch_1 = arena_create(1024);
-    scratch_2 = arena_create(1024);
+    scratch_1 = arena_create(MEGABYTES(1));
+    scratch_2 = arena_create(MEGABYTES(1));
     init = FALSE;
   }
 
@@ -61,9 +61,13 @@ Arena get_scratch(Arena *conflicts[], u8 conflict_count)
 
   for (u8 i = 0; i < conflict_count; i++)
   {
-    if (&scratch_1 == conflicts[i])
+    if (conflicts[i] == &scratch_2)
     {
       scratch = scratch_2;
+    }
+    else if (conflicts[i] == &scratch_2)
+    {
+      scratch = scratch_1;
     }
   }
 

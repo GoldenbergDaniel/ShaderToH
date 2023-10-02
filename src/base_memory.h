@@ -10,6 +10,10 @@ struct Arena
   u64 used;
 };
 
+#define KILOBYTES(bytes) (bytes << 10)
+#define MEGABYTES(bytes) (bytes << 20)
+#define GIGABYTES(bytes) (bytes << 30)
+
 // Creates a new Arena with `size` bytes of memory
 Arena arena_create(u64 size);
 // Frees all memory in the arena

@@ -9,16 +9,11 @@ static void cstr_copy(String *dest, i8 *src);
 String str_lit(i8 *str)
 {
   String result = {str, cstr_len(str)-1};
-
-  if (str[0] == '\0')
-  {
-    result.len += 1;
-  }
-
+  if (str[0] == '\0') result.len += 1;
   return result;
 }
 
-void str_copy(String *dest, String src)
+String *str_copy(String *dest, String src)
 {
   for (u32 i = 0; i < src.len; i++)
   {
@@ -26,6 +21,8 @@ void str_copy(String *dest, String src)
   }
   
   dest->len = src.len;
+
+  return dest;
 }
 
 String str_concat(String str1, String str2, Arena *arena)
@@ -124,7 +121,7 @@ i32 str_find_substr(String str, String substr)
   return loc;
 }
 
-// String str_substring(String str, u32 start, u32 end)
+// String str_substr(String str, u32 start, u32 end)
 // {
 //   assert(start >= 0 && start < str.len && end > 0 && end <= str.len && start < end);
 
@@ -145,7 +142,6 @@ u32 cstr_len(i8 *cstr)
 {
   u32 len = 0;
   for (; cstr[len]; len++);
-
   return len+1;
 }
 

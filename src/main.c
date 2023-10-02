@@ -6,42 +6,47 @@
 
 #include "base_string.h"
 
-typedef struct dirent Dirent;
+typedef struct dirent DIRENT;
 
 #define INPUT_PATH "input/"
-#define OUTPUT_PATH "input/shaders.h"
+#define OUTPUT_PATH "output/shaders.h"
 #define BUFFER_SIZE 256
 
-void read_file(FILE *stream, String container[], u32 count, Arena *arena);
+void read_file(FILE *stream, String container[], Arena *arena);
 
 i32 main(void)
 {
-  Arena arena = arena_create(1024);
-  DIR *inputs_dir = opendir("input");
+  Arena arena = arena_create(MEGABYTES(1));
+  DIR *inputs_dir = opendir(INPUT_PATH);
   ASSERT(inputs_dir);
 
-  u8 count = 0;
-  for (Dirent *f; (f = readdir(inputs_dir));)
+  i8 file_count = 0;
+  for (DIRENT *d; (d = readdir(inputs_dir)); file_count++)
   {
-    String file_name = {f->d_name, f->d_namlen};
+    String file_name = {d->d_name, d->d_namlen};
 
     if (str_equals(file_name, str_lit(".")) ||
-        str_equals(file_name, str_lit("..")) )
+        str_equals(file_name, str_lit("..")) ||
+        str_equals(file_name, str_lit(".DS_Store")))
+    {
+      file_count--;
       continue;
+    }
 
     String lines[BUFFER_SIZE] = {0};
+
     String path = str_lit(INPUT_PATH);
     path = str_concat(path, file_name, &arena);
     path = str_concat(path, str_lit("\0"), &arena);
 
     FILE *file = fopen(path.str, "r");
-    read_file(file, lines, BUFFER_SIZE, &arena);
-    file = freopen(OUTPUT_PATH, "a+", file);
+    read_file(file, lines, &arena);
+    file = freopen(OUTPUT_PATH, "a", file);
     ASSERT(file);
 
     fputs("const char *shader = \"", file);
 
-    for (u32 i = 0; lines[i].str; i++)
+    for (u32 i = 0; lines[i].str != NULL; i++)
     {
       fputs(lines[i].str, file);
     }
@@ -49,24 +54,23 @@ i32 main(void)
     fputs("\";\n", file);
 
     arena_clear(&arena);
-    count++;
   }
 
-  printf("Parsed %i files!\n", count);
+  printf("Parsed %i files!\n", file_count);
 
   return 0;
 }
 
-void read_file(FILE *stream, String container[], u32 count, Arena *arena)
+void read_file(FILE *stream, String container[], Arena *arena)
 {
   Arena scratch = get_scratch((Arena **) {&arena}, 1);
-  String buf = {0};
+  String buf;
   buf.str = arena_alloc(&scratch, BUFFER_SIZE);
 
-  u32 i = 0;
-  while (fgets(buf.str, BUFFER_SIZE, stream))
+  u32 i = 0;  
+  while (fgets(buf.str, BUFFER_SIZE, stream) != NULL)
   {
-    if (i == count) break;
+    if (i == BUFFER_SIZE) break;
 
     buf.len = cstr_len(buf.str);
 
@@ -78,7 +82,6 @@ void read_file(FILE *stream, String container[], u32 count, Arena *arena)
       container[i].len = buf.len;
       str_copy(&container[i], buf);
       str_strip(&container[i], '\n');
-
       i++;
     }
   }

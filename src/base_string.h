@@ -13,7 +13,7 @@ struct String
 // Returns a string with length calculated automatically.
 String str_lit(i8 *str);
 // Copies source string to destination string
-void str_copy(String *dest, String src);
+String *str_copy(String *dest, String src);
 // Appends source string to destination string
 String str_concat(String str1, String str2, Arena *arena);
 // Removes the last occurence of character from string. 

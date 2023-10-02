@@ -17,7 +17,7 @@ typedef double f64;
 #define TRUE 1
 #define FALSE 0
 
-#define thread_local static __thread
+#define thread_local __thread
 
 #define ASSERT(exp) assert(exp)
 #define ARR_LEN(arr) (sizeof (arr) / sizeof (arr[0]))
