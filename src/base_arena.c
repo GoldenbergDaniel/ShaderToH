@@ -2,7 +2,7 @@
 
 #include "base_common.h"
 #include "base_os.h"
-#include "base_memory.h"
+#include "base_arena.h"
 
 Arena arena_create(u64 size)
 {
@@ -44,11 +44,13 @@ void arena_clear(Arena *arena)
   arena->used = 0;
 }
 
-Arena get_scratch(Arena *conflicts[], u8 conflict_count)
+typedef unsigned char bool;
+
+Arena arena_get_scratch(Arena *conflicts[], u8 conflict_count)
 {
   static thread_local Arena scratch_1;
   static thread_local Arena scratch_2;
-  static thread_local b8 init = TRUE;
+  static thread_local bool init = TRUE;
 
   if (init)
   {
@@ -57,19 +59,27 @@ Arena get_scratch(Arena *conflicts[], u8 conflict_count)
     init = FALSE;
   }
 
-  Arena scratch = scratch_1;
+  Arena result = scratch_1;
 
   for (u8 i = 0; i < conflict_count; i++)
   {
+    Arena *conflict = conflicts[i];
+
     if (conflicts[i] == &scratch_2)
     {
-      scratch = scratch_2;
+      result = scratch_2;
     }
-    else if (conflicts[i] == &scratch_2)
+    else if (conflict == &scratch_2)
     {
-      scratch = scratch_1;
+      result = scratch_1;
+    }
+    else if (conflict == &scratch_1 &&
+             conflict == &scratch_2)
+    {
+      printf("No free scratch arena found!");
+      ASSERT(FALSE);
     }
   }
 
-  return scratch;
+  return result;
 }
