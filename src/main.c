@@ -9,9 +9,10 @@ typedef struct dirent DIRENT;
 
 #define INPUTS_PATH "input/"
 #define OUTPUT_PATH "output/shaders.h"
-#define BUFFER_SIZE 256
+#define MAX_LINES 512 
+#define BUF_SIZE 128
 
-void read_shader(FILE *stream, String container[], Arena *arena);
+void read_shader(FILE *file, String container[], Arena *arena);
 
 i32 main(void)
 {
@@ -36,31 +37,43 @@ i32 main(void)
       continue;
     }
 
-    String lines[BUFFER_SIZE] = {0};
-
     String path = str_lit(INPUTS_PATH);
     path = str_concat(path, file_name, &arena);
     path = str_concat(path, STR_NULL, &arena);
 
+    String lines[MAX_LINES] = {0};
     file = freopen(path.str, "r", file);
     read_shader(file, lines, &arena);
     file = freopen(OUTPUT_PATH, "a", file);
     ASSERT(file);
 
-    fputs("const char *shader = \"", file);
+    i32 i = 0;
 
-    for (u32 i = 0; lines[i].str != NULL; i++)
+    // Vertex shader
+    fputs("const char *v_shader_src = \"", file);
+
+    for (; !str_contains(lines[i], str_lit("@Fragment")) && lines[i].str; i++)
     {
-      str_print(lines[i]);
-
-      if (str_contains(lines[i], str_lit("@Vertex")) ||
-          str_contains(lines[i], str_lit("@Fragment")))
-        continue;
+      if (str_contains(lines[i], str_lit("@Vertex"))) continue;
 
       fputs(lines[i].str, file);
+      fputs(" ", file);
     }
 
     fputs("\";\n", file);
+
+    // Fragment shader
+    fputs("const char *f_shader_src = \"", file);
+
+    for (; lines[i].str != NULL; i++)
+    {
+      if (str_contains(lines[i], str_lit("@Fragment"))) continue;
+
+      fputs(lines[i].str, file);
+      fputs(" ", file);
+    }
+
+    fputs("\";\n\n", file);
 
     arena_clear(&arena);
   }
@@ -70,20 +83,21 @@ i32 main(void)
   return 0;
 }
 
-void read_shader(FILE *stream, String container[], Arena *arena)
+void read_shader(FILE *file, String container[], Arena *arena)
 {
   Arena scratch = arena_get_scratch((Arena **) {&arena}, 1);
   String buf;
-  buf.str = arena_alloc(&scratch, BUFFER_SIZE);
+  buf.str = arena_alloc(&scratch, BUF_SIZE);
 
   u32 i = 0;  
-  while (fgets(buf.str, BUFFER_SIZE, stream) != NULL)
+  while (fgets(buf.str, BUF_SIZE, file) != NULL)
   {
     buf.len = cstr_len(buf.str);
 
+    str_strip(&buf, '\0');
+
     if (str_equals(buf, str_lit("\n"))) continue;
 
-    str_strip(&buf, '\0');
     container[i].str = arena_alloc(arena, buf.len);
     container[i].len = buf.len;
     str_copy(&container[i], buf);

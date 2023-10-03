@@ -1,2 +1,1 @@
- - Associate the variable's nme with the shader file's name
- - Split shader file into two variables, one for vertex and the other for fragment
+ - Associate the variable's name with the shader file's name
