@@ -12,6 +12,15 @@ String str_lit(i8 *s)
   return (String) {s, cstr_len(s)-1};
 }
 
+String str_new(u32 len, Arena *arena)
+{
+  String result;
+  result.len = len;
+  result.str = arena_alloc(arena, len);
+
+  return result;
+}
+
 String *str_copy(String *dest, String src)
 {
   for (u32 i = 0; i < src.len; i++)
@@ -22,25 +31,6 @@ String *str_copy(String *dest, String src)
   dest->len = src.len;
 
   return dest;
-}
-
-String str_concat(String s1, String s2, Arena *arena)
-{
-  String result = {0};
-  result.len = s1.len + s2.len;
-  result.str = arena_alloc(arena, result.len);
-
-  for (u32 i = 0; i < s1.len; i++)
-  {
-    result.str[i] = s1.str[i];
-  }
-
-  for (u32 i = 0; i < s2.len; i++)
-  {
-    result.str[i+s1.len] = s2.str[i];
-  }
-
-  return result;
 }
 
 bool str_strip(String *s, i8 c)
@@ -79,29 +69,28 @@ bool str_equals(String s1, String s2)
   return equals;
 }
 
-i64 str_find_char(String s, i8 c)
+String str_concat(String s1, String s2, Arena *arena)
 {
-  i64 loc = -1;
+  String result = str_new(s1.len + s2.len, arena);
 
-  for (u32 i = 0; i < s.len; i++)
+  for (u32 i = 0; i < s1.len; i++)
   {
-    if (s.str[i] == c)
-    {
-      loc = i;
-      break;
-    }
+    result.str[i] = s1.str[i];
   }
 
-  return loc;
+  for (u32 i = 0; i < s2.len; i++)
+  {
+    result.str[i+s1.len] = s2.str[i];
+  }
+
+  return result;
 }
 
 String str_substr(String s, u32 start, u32 end, Arena *arena)
 {
   ASSERT(start >= 0 && start < s.len && end > 0 && end <= s.len && start < end);
 
-  String result = {0};
-  result.str = arena_alloc(arena, end-start);
-  result.len = end-start;
+  String result = str_new(end-start, arena);
 
   for (u32 i = start; i < end; i++)
   {
@@ -109,6 +98,47 @@ String str_substr(String s, u32 start, u32 end, Arena *arena)
   }
 
   return result;
+}
+
+String str_nullify(String s, Arena *arena)
+{
+  String result = str_new(s.len+1, arena);
+
+  for (u32 i = 0; i < result.len-1; i++)
+  {
+    result.str[i] = s.str[i];
+  }
+
+  result.str[result.len-1] = '\0';
+
+  return result;
+}
+
+bool str_contains(String s, String substr)
+{
+  if (s.len < substr.len) return FALSE;
+
+  bool contains = FALSE;
+
+  for (u32 i = 0; i < s.len-substr.len+1; i++)
+  {
+    if (s.str[i] == substr.str[0])
+    {
+      for (u32 j = 1; j < substr.len; j++)
+      {
+        if (s.str[i+j] != substr.str[j]) break;
+
+        if (j == substr.len-1)
+        {
+          contains = TRUE;
+          goto end;
+        }
+      }
+    }
+  }
+
+  end:
+  return contains;
 }
 
 i64 str_find(String s, String substr)
@@ -138,31 +168,20 @@ i64 str_find(String s, String substr)
   return loc;
 }
 
-bool str_contains(String s, String substr)
+i64 str_find_char(String s, i8 c)
 {
-  if (s.len < substr.len) return FALSE;
+  i64 loc = -1;
 
-  bool contains = FALSE;
-
-  for (u32 i = 0; i < s.len-substr.len+1; i++)
+  for (u32 i = 0; i < s.len; i++)
   {
-    if (s.str[i] == substr.str[0])
+    if (s.str[i] == c)
     {
-      for (u32 j = 1; j < substr.len; j++)
-      {
-        if (s.str[i+j] != substr.str[j]) break;
-
-        if (j == substr.len-1)
-        {
-          contains = TRUE;
-          goto end;
-        }
-      }
+      loc = i;
+      break;
     }
   }
 
-  end:
-  return contains;
+  return loc;
 }
 
 void str_print(String s)

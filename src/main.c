@@ -42,7 +42,7 @@ i32 main(void)
 
     String path = str_lit(INPUTS_PATH);
     path = str_concat(path, file_name, &arena);
-    path = str_concat(path, STR_NULL, &arena);
+    path = str_nullify(path, &arena);
 
     String lines[MAX_LINES] = {0};
     file = freopen(path.str, "r", file);
@@ -93,8 +93,7 @@ i32 main(void)
 void read_shader(FILE *file, String container[], Arena *arena)
 {
   Arena scratch = arena_get_scratch((Arena **) {&arena}, 1);
-  String buf;
-  buf.str = arena_alloc(&scratch, BUF_SIZE);
+  String buf = str_new(BUF_SIZE, &scratch);
 
   u32 i = 0;  
   while (fgets(buf.str, BUF_SIZE, file) != NULL)
@@ -104,9 +103,8 @@ void read_shader(FILE *file, String container[], Arena *arena)
     str_strip(&buf, '\0');
 
     if (str_equals(buf, str_lit("\n"))) continue;
-
-    container[i].str = arena_alloc(arena, buf.len);
-    container[i].len = buf.len;
+    
+    container[i] = str_new(buf.len, arena);
     str_copy(&container[i], buf);
     str_strip(&container[i], '\n');
 
