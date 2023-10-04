@@ -102,14 +102,14 @@ String str_substr(String s, u32 start, u32 end, Arena *arena)
 
 String str_nullify(String s, Arena *arena)
 {
-  String result = str_new(s.len+1, arena);
+  String result = str_new(s.len, arena);
 
-  for (u32 i = 0; i < result.len-1; i++)
+  for (u32 i = 0; i < result.len; i++)
   {
     result.str[i] = s.str[i];
   }
 
-  result.str[result.len-1] = '\0';
+  result.str[result.len] = '\0';
 
   return result;
 }

@@ -60,7 +60,8 @@ i32 main(void)
     {
       if (str_contains(lines[i], str_lit("@Vertex"))) continue;
 
-      fputs(lines[i].str, file);
+      String nullified = str_nullify(lines[i], &arena);
+      fputs(nullified.str, file);
       fputs(" ", file);
     }
 
@@ -74,7 +75,8 @@ i32 main(void)
     {
       if (str_contains(lines[i], str_lit("@Fragment"))) continue;
 
-      fputs(lines[i].str, file);
+      String nullified = str_nullify(lines[i], &arena);
+      fputs(nullified.str, file);
       fputs(" ", file);
     }
 
@@ -121,6 +123,7 @@ String gen_var_name(i8 *file_name, String suffix, Arena *arena)
   String shader_var = str_lit("const char *");
   shader_var = str_concat(shader_var, name, arena);
   shader_var = str_concat(shader_var, suffix, arena); 
+  shader_var = str_nullify(shader_var, arena);
 
   return shader_var;
 }
