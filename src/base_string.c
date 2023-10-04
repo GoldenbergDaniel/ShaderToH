@@ -79,9 +79,9 @@ bool str_equals(String s1, String s2)
   return equals;
 }
 
-i32 str_find_char(String s, i8 c)
+i64 str_find_char(String s, i8 c)
 {
-  i32 loc = -1;
+  i64 loc = -1;
 
   for (u32 i = 0; i < s.len; i++)
   {
@@ -95,18 +95,27 @@ i32 str_find_char(String s, i8 c)
   return loc;
 }
 
-String str_substr(String str, u32 start, u32 end, Arena *arena)
+String str_substr(String s, u32 start, u32 end, Arena *arena)
 {
-  assert(start >= 0 && start < str.len && end > 0 && end <= str.len && start < end);
+  ASSERT(start >= 0 && start < s.len && end > 0 && end <= s.len && start < end);
 
-  return (String) {"", 0};
+  String result = {0};
+  result.str = arena_alloc(arena, end-start);
+  result.len = end-start;
+
+  for (u32 i = start; i < end; i++)
+  {
+    result.str[i] = s.str[i];
+  }
+
+  return result;
 }
 
-i32 str_find(String s, String substr)
+i64 str_find(String s, String substr)
 {
   if (s.len < substr.len) return FALSE;
 
-  i32 loc = -1;
+  i64 loc = -1;
 
   for (u32 i = 0; i < s.len-substr.len+1; i++)
   {

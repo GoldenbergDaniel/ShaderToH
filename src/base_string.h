@@ -21,18 +21,15 @@ String *str_copy(String *dest, String src);
 // Appends source string to destination string
 String str_concat(String s1, String s2, Arena *arena);
 // Removes the last occurence of character from string. 
-// Returns false if doesn't exist
 bool str_strip(String *s, i8 c);
 // Returns whether the chracters of string1 match those of string2. 
 bool str_equals(String s1, String s2);
 // Returns the index of the first character in string. 
-// Returns -1 if char doesn't exist.
-i32 str_find_char(String s, i8 c);
+i64 str_find_char(String s, i8 c);
 // TODO: Figure out what this should do
 String str_substr(String s, u32 start, u32 end, Arena *arena);
 // Returns the index of the first insatnce of substring in string. 
-// Returns -1 if substring doesn't exist.
-i32 str_find(String s, String substr);
+i64 str_find(String s, String substr);
 // Check if string contains substring
 bool str_contains(String s, String substr);
 // Print string to terminal
