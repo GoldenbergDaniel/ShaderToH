@@ -14,4 +14,4 @@ test:
 	$(CC) ../src/*.c -g
 
 run:
-	@./$(NAME) $(arg)
+	@./$(NAME)

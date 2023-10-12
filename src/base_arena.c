@@ -4,6 +4,10 @@
 #include "base_os.h"
 #include "base_arena.h"
 
+#ifndef SCRATCH_SIZE
+#define SCRATCH_SIZE MEGABYTES(4)
+#endif
+
 Arena arena_create(u64 size)
 {
   Arena arena;
@@ -26,9 +30,9 @@ void *arena_alloc(Arena *arena, u64 size)
 {
   ASSERT(arena->size >= arena->used + size);
 
-  i8 *allocated = arena->memory + arena->used;
+  byte *allocated = arena->memory + arena->used;
   arena->used += size;
-
+  
   return allocated;
 }
 
@@ -44,42 +48,22 @@ void arena_clear(Arena *arena)
   arena->used = 0;
 }
 
-typedef unsigned char bool;
-
-Arena arena_get_scratch(Arena *conflicts[], u8 conflict_count)
+Arena arena_get_scratch(Arena *conflict)
 {
-  static thread_local Arena scratch_1;
-  static thread_local Arena scratch_2;
-  static thread_local bool init = TRUE;
+  static THREAD_LOCAL Arena scratch_1;
+  static THREAD_LOCAL Arena scratch_2;
+  static THREAD_LOCAL bool init = TRUE;
 
   if (init)
   {
-    scratch_1 = arena_create(MEGABYTES(1));
-    scratch_2 = arena_create(MEGABYTES(1));
+    scratch_1 = arena_create(SCRATCH_SIZE);
+    scratch_2 = arena_create(SCRATCH_SIZE);
     init = FALSE;
   }
 
-  Arena result = scratch_1;
+  Arena scratch = scratch_1;
+  if (conflict == &scratch_1) scratch = scratch_2;
+  else if (conflict == &scratch_2) scratch = scratch_1;
 
-  for (u8 i = 0; i < conflict_count; i++)
-  {
-    Arena *conflict = conflicts[i];
-
-    if (conflicts[i] == &scratch_2)
-    {
-      result = scratch_2;
-    }
-    else if (conflict == &scratch_2)
-    {
-      result = scratch_1;
-    }
-    else if (conflict == &scratch_1 &&
-             conflict == &scratch_2)
-    {
-      printf("No free scratch arena found!");
-      ASSERT(FALSE);
-    }
-  }
-
-  return result;
+  return scratch;
 }

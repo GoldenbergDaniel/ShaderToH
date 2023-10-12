@@ -8,7 +8,7 @@ uniform mat4 u_xform;
 
 void main()
 {
-  gl_Position = u_xform * vec4(a_pos, 1.0);
+  gl_Position = u_xform * vec4(a_pos, 1.0); // this is comment
 }
 
 // @Fragment ================================================================================

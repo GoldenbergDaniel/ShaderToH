@@ -20,6 +20,7 @@ bool str_strip(String *s, i8 c); // alloc new stirng; strings are immutable
 String str_concat(String s1, String s2, Arena *arena);
 String str_substr(String s, u32 start, u32 end, Arena *arena);
 String str_nullify(String s, Arena *arena);
+
 bool str_contains(String s, String substr);
 i64 str_find(String s, String substr);
 i64 str_find_char(String s, i8 c);

@@ -1,13 +1,13 @@
-#define BACKEND_LIBC
-// #define BACKEND_UNIX
+// #define BACKEND_LIBC
+#define BACKEND_UNIX
 
 #ifdef BACKEND_LIBC
+#include <stdio.h>
 #include <stdlib.h>
 #endif
 
 #ifdef BACKEND_UNIX
 #include <sys/mman.h>
-#define NULL (void *) 0
 #endif
 
 #include "base_common.h"
@@ -21,15 +21,19 @@ void *os_alloc(u64 size)
   #endif
 
   #ifdef BACKEND_UNIX
-  return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
+  i32 p_flags = PROT_READ | PROT_WRITE | PROT_EXEC;
+  i32 m_flags = MAP_ANON | MAP_SHARED;
+  return mmap(NULL, size, p_flags, m_flags, -1, 0);
   #endif
 }
 
 inline
-void *os_alloc_file(i32 file, u64 size, i32 offset)
+void *os_map_file(i32 file, u64 size, i32 offset)
 {
   #ifdef BACKEND_UNIX
-  return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, file, offset);
+  i32 p_flags = PROT_READ | PROT_WRITE | PROT_EXEC;
+  i32 m_flags = MAP_SHARED;
+  return mmap(NULL, size, p_flags, m_flags, file, offset);
   #endif
 
   #ifdef BACKEND_LIBC

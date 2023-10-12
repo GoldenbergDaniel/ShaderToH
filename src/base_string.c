@@ -143,7 +143,7 @@ bool str_contains(String s, String substr)
 
 i64 str_find(String s, String substr)
 {
-  if (s.len < substr.len) return FALSE;
+  if (s.len < substr.len) return -1;
 
   i64 loc = -1;
 
