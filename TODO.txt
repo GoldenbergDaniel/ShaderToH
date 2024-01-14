@@ -1,1 +1,0 @@
- - Associate the variable's name with the shader file's name

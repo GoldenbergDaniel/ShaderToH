@@ -2,9 +2,9 @@
 
 #include "base_common.h"
 
-#define KILOBYTES(bytes) (bytes << 10)
-#define MEGABYTES(bytes) (bytes << 20)
-#define GIGABYTES(bytes) (bytes << 30)
+#define KiB(bytes) (bytes << 10)
+#define MiB(bytes) (bytes << 20)
+#define GiB(bytes) (bytes << 30)
 
 // @Arena ===================================================================================
 

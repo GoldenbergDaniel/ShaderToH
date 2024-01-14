@@ -1,5 +1,5 @@
-NAME = ParserPack
-CFLAGS = -std=c17
+NAME = ShaderToC
+CFLAGS = -O1 -std=c17
 CC = cc
 
 all:

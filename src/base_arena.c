@@ -5,7 +5,7 @@
 #include "base_arena.h"
 
 #ifndef SCRATCH_SIZE
-#define SCRATCH_SIZE MEGABYTES(4)
+#define SCRATCH_SIZE MiB(4)
 #endif
 
 Arena arena_create(u64 size)
