@@ -1,92 +1,114 @@
-#include <sys/dir.h>
+#include <dirent.h>
 #include <stdio.h>
+#include <assert.h>
 
-#include "base_common.h"
-#include "base_arena.h"
-#include "base_string.h"
+#include "base/base_common.h"
+#include "base/base_arena.h"
+#include "base/base_string.h"
 
-typedef struct dirent DIRENT;
-
-#define INPUTS_PATH "res/shader/"
-#define OUTPUT_PATH "src/gfx/shaders.h"
+#define MAX_FILES 64
 #define MAX_LINES 512
 #define BUF_SIZE 128
 
-static void read_file(FILE *file, String container[], Arena *arena);
-static String gen_var_name(i8 *file_name, String suffix, Arena *arena);
+typedef struct dirent DIRENT;
 
-i32 main(void)
+static void read_file_into_array(FILE *file, String container[], Arena *arena);
+static String gen_var_name(String file_name, String suffix, Arena *arena);
+static StringArray file_names_from_dir(String dir_name, String file_ext, Arena *arena);
+static StringArray _file_names_from_dir_unix(String dir_name, String file_ext, Arena *arena);
+static StringArray _file_names_from_dir_windows(String dir_name, String file_ext, Arena *arena);
+
+i32 main(i32 argc, char **argv)
 {
-  Arena arena = arena_create(MiB(1));
-  DIR *inputs_dir = opendir(INPUTS_PATH);
-  ASSERT(inputs_dir);
+  Arena arena = arena_create(MiB(16));
+  arena_get_scratch(NULL);
+
+  if (argc < 3)
+  {
+    printf("usage: shadertoh shaders_dir header_file [-x extension]\n");
+    return 0;
+  }
+
+  String file_extension = str(".glsl");
+  {
+    if (argc == 5)
+    {
+      String option = str_from_cstr(argv[3], &arena);
+      if (str_equals(option, str("-x")))
+      {
+        file_extension = str_from_cstr(argv[4], &arena);
+      }
+    }
+  }
+
+  String input_path = str_from_cstr(argv[1], &arena);
+  String output_path = str_from_cstr(argv[2], &arena);
+
+  DIR *inputs_dir = opendir(input_path.str);
+  assert(inputs_dir);
 
   // Clear output
-  FILE *file = fopen(OUTPUT_PATH, "w");
-  ASSERT(file);
-  fputs("", file);
+  FILE *output_file = fopen(output_path.str, "w");
+  assert(output_file);
+  fputs("", output_file);
+  fputs("#pragma once\n\n", output_file);
 
-  for (DIRENT *d; (d = readdir(inputs_dir));)
+  StringArray file_names = file_names_from_dir(input_path, file_extension, &arena);
+  for (i32 i = 0; i < file_names.count; i++)
   {
-    String file_name = {d->d_name, d->d_namlen};
-    
-    if (!str_contains(file_name, str(".glsl"))) continue;
-
-    String path = str(INPUTS_PATH);
-    path = str_concat(path, file_name, &arena);
-    path = str_nullify(path, &arena);
-    file = freopen(path.str, "r", file);
+    String file_name = file_names.e[i];
+    print_str(file_name, TRUE);
+    String file_path = str_concat(input_path, file_name, &arena);
+    FILE *input_file = fopen(file_path.str, "r");
+    assert(input_file);
 
     String lines[MAX_LINES] = {0};
-    read_file(file, lines, &arena);
-    file = freopen(OUTPUT_PATH, "a", file);
-    ASSERT(file);
+    read_file_into_array(input_file, lines, &arena);
+    output_file = freopen(output_path.str, "a", output_file);
 
-    u16 i = 0;
-
-    fputs("#pragma once\n\n", file);
+    u16 line_idx = 0;
 
     // Vertex shader
-    String shader_var = gen_var_name(d->d_name, str("_VERT_SRC = \""), &arena);
-    fwrite(shader_var.str, 1, shader_var.len, file);
+    String shader_var = gen_var_name(file_name, str("_VERT_SRC = \""), &arena);
+    fwrite(shader_var.str, 1, shader_var.len, output_file);
 
-    for (; !str_contains(lines[i], str("@Fragment")) && lines[i].str; i++)
+    for (; !str_contains(lines[line_idx], str("@Fragment")) && lines[line_idx].str; line_idx++)
     {
-      if (str_contains(lines[i], str("@Vertex"))) continue;
+      if (str_contains(lines[line_idx], str("@Vertex"))) continue;
 
-      fwrite(lines[i].str, 1, lines[i].len, file);
-      fputs(" ", file);
+      fwrite(lines[line_idx].str, 1, lines[line_idx].len, output_file);
+      fputs(" ", output_file);
     }
 
-    fputs("\";\n", file);
+    fputs("\";\n", output_file);
 
     // Fragment shader
-    shader_var = gen_var_name(d->d_name, str("_FRAG_SRC = \""), &arena);
-    fwrite(shader_var.str, 1, shader_var.len, file);
+    shader_var = gen_var_name(file_name, str("_FRAG_SRC = \""), &arena);
+    fwrite(shader_var.str, 1, shader_var.len, output_file);
 
-    for (; lines[i].str != NULL; i++)
+    for (; lines[line_idx].str != NULL; line_idx++)
     {
-      if (str_contains(lines[i], str("@Fragment"))) continue;
+      if (str_contains(lines[line_idx], str("@Fragment"))) continue;
 
-      fwrite(lines[i].str, 1, lines[i].len, file);
-      fputs(" ", file);
+      fwrite(lines[line_idx].str, 1, lines[line_idx].len, output_file);
+      fputs(" ", output_file);
     }
 
-    fputs("\";\n\n", file);
-    arena_clear(&arena);
+    fputs("\";\n", output_file);
   }
+
+  arena_clear(&arena);
 
   return 0;
 }
 
 static
-void read_file(FILE *file, String container[], Arena *arena)
+void read_file_into_array(FILE *file, String container[], Arena *arena)
 {
   Arena scratch = arena_get_scratch(arena);
   String buf = str_create(BUF_SIZE, &scratch);
 
-  u32 i = 0;
-  while (fgets(buf.str, BUF_SIZE, file) != NULL)
+  for (i32 i = 0; fgets(buf.str, BUF_SIZE, file) != NULL;)
   {
     buf.len = cstr_len(buf.str) - 1;
     String line = str_copy(buf, &scratch);
@@ -96,7 +118,7 @@ void read_file(FILE *file, String container[], Arena *arena)
     container[i] = str_copy(line, arena);
     container[i] = str_strip_back(container[i], str("\n"));
 
-    i32 comment_pos = str_find(container[i], str("//"), 0, 999);
+    i32 comment_pos = str_find(container[i], str("//"), 0, BUF_SIZE);
     if (comment_pos != -1 && !str_contains(container[i], str("// @")))
     {
       container[i] = str_substr(container[i], 0, comment_pos);
@@ -109,13 +131,67 @@ void read_file(FILE *file, String container[], Arena *arena)
 }
 
 static
-String gen_var_name(i8 *file_name, String suffix, Arena *arena)
+String gen_var_name(String file_name, String suffix, Arena *arena)
 {
-  i32 delimiter_pos = str_find_char(str(file_name), '.', 0, 999);
-  String name = str_substr(str(file_name), 0, delimiter_pos);
+  i32 delimiter_pos = str_find_char(file_name, '.', 0, 999);
+  String name = str_substr(file_name, 0, delimiter_pos);
+  name = str_to_upper(name, arena);
   String shader_var = str("const char *");
   shader_var = str_concat(shader_var, name, arena);
-  shader_var = str_concat(shader_var, suffix, arena); 
+  shader_var = str_concat(shader_var, suffix, arena);
 
   return shader_var;
 }
+
+static
+StringArray file_names_from_dir(String dir_name, String file_ext, Arena *arena)
+{
+  StringArray result;
+  #if defined(_WIN32)
+  result = _file_names_from_dir_windows(dir_name, file_ext, arena);
+  #else
+  result = _file_names_from_dir_unix(dir_name, file_ext, arena);
+  #endif
+
+  return result;
+}
+
+#if defined(__APPLE__) || defined(__linux__)
+static
+StringArray _file_names_from_dir_unix(String dir_name, String file_ext, Arena *arena)
+{
+  Arena scratch = arena_get_scratch(arena);
+  StringArray result = create_str_array(MAX_FILES, arena);
+
+  dir_name = str_nullify(dir_name, &scratch);
+  DIR *dir = opendir(dir_name.str);
+  assert(dir);
+
+  i32 count = 0;
+  for (DIRENT *dirent; (dirent = readdir(dir));)
+  {
+    String file_name = str_copy((String) {dirent->d_name, dirent->d_namlen}, arena);
+    if (!str_contains(file_name, file_ext)) continue;
+    result.e[count] = file_name;
+    count += 1;
+  }
+
+  result.count = count;
+
+  arena_clear(&scratch);
+  closedir(dir);
+
+  return result;
+}
+#endif
+
+#if defined(_WIN32)
+static
+StringArray _file_names_from_dir_windows(String dir_name, String file_ext, Arena *arena)
+{
+  Arena scratch = arena_get_scratch(arena);
+  StringArray result = create_str_array(MAX_FILES, arena);
+
+  return result;
+}
+#endif

@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <assert.h>
 
 #include "base_common.h"
 #include "base_arena.h"
 #include "base_string.h"
 
-// @String =====================================================================================
+// @String ===============================================================================
 
 String str_create(u32 len, Arena *arena)
 {
@@ -16,9 +17,9 @@ String str_create(u32 len, Arena *arena)
 }
 
 inline
-String str_from_cstring(char *cstr, Arena *arena)
+String str_from_cstr(char *cstr, Arena *arena)
 {
-  return str_copy(str(cstr), arena);
+  return str_copy((String) {cstr, cstr_len(cstr)-1}, arena);
 }
 
 bool str_equals(String s1, String s2)
@@ -91,7 +92,7 @@ i64 str_find(String s, String substr, u64 start, u64 end)
   return result;
 }
 
-i64 str_find_char(String s, i8 c, u32 start, u64 end)
+i64 str_find_char(String s, char c, u32 start, u64 end)
 {
   if (start >= s.len) return FALSE;
 
@@ -112,8 +113,7 @@ i64 str_find_char(String s, i8 c, u32 start, u64 end)
 String str_copy(String s, Arena *arena)
 {
   String result = {0};
-  result.str = arena_alloc(arena, s.len);
-  result.len = s.len;
+  result.str = arena_alloc(arena, s.len+1);
 
   for (u32 i = 0; i < s.len; i++)
   {
@@ -121,6 +121,7 @@ String str_copy(String s, Arena *arena)
   }
   
   result.len = s.len;
+  result.str[result.len] = '\0';
 
   return result;
 }
@@ -161,7 +162,8 @@ String str_insert_at(String s, String substr, u32 loc, Arena *arena)
 
 String str_concat(String s1, String s2, Arena *arena)
 {
-  String result = str_create(s1.len + s2.len, arena);
+  String result = str_create(s1.len + s2.len + 1, arena);
+  result.len -= 1;
 
   for (u32 i = 0; i < s1.len; i++)
   {
@@ -172,6 +174,8 @@ String str_concat(String s1, String s2, Arena *arena)
   {
     result.str[i+s1.len] = s2.str[i];
   }
+
+  result.str[result.len] = '\0';
 
   return result;
 }
@@ -316,23 +320,24 @@ StringArray str_split(String s, String delimiter, Arena *arena)
   return result;
 }
 
-void str_print(String s)
+void print_str(String s, bool nl)
 {
   for (u32 i = 0; i < s.len; i++)
   {
     printf("%c", s.str[i]);
   }
 
-  printf("\n");
+  if (nl) printf("\n");
 }
 
-// @StringArray ================================================================================
+// @StringArray ==========================================================================
 
-StringArray create_str_array(u64 count, Arena *arena)
+StringArray create_str_array(u64 capacity, Arena *arena)
 {
   StringArray arr = {0};
-  arr.count = count;
-  arr.e = arena_alloc(arena, sizeof (String) * count);
+  arr.capacity = capacity;
+  arr.count = capacity;
+  arr.e = arena_alloc(arena, sizeof (String) * capacity);
 
   return arr;
 }
@@ -347,17 +352,17 @@ void clear_str_array(StringArray *arr, Arena *arena)
   arr->count = 0;
 }
 
-// @CString ====================================================================================
+// @CString ==============================================================================
 
 inline
-u32 cstr_len(i8 *s)
+u32 cstr_len(char *s)
 {
   u32 len = 0;
   for (; s[len]; len++);
   return len+1;
 }
 
-void copy_cstr_into_str(String *dest, i8 *src)
+void copy_cstr_into_str(String *dest, char *src)
 {
   u32 len = cstr_len(src)-1;
   for (u32 i = 0; i < len; i++)

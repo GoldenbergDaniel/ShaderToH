@@ -13,18 +13,18 @@ typedef struct StringQueue StringQueue;
 
 struct String
 {
-  i8 *str;
+  char *str;
   u32 len;
 };
 
-#define str(s) ((String) {s, cstr_len(s)-1})
+#define str(s) ((String) {s, sizeof (s) - 1})
 
 String str_create(u32 len, Arena *arena);
-String str_from_cstring(i8 *cstr, Arena *arena);
+String str_from_cstr(char *cstr, Arena *arena);
 bool str_equals(String s1, String s2);
 bool str_contains(String s, String substr);
 i64 str_find(String s, String substr, u64 start, u64 end);
-i64 str_find_char(String s, i8 c, u32 start, u64 end);
+i64 str_find_char(String s, char c, u32 start, u64 end);
 String str_substr(String s, u32 start, u32 end);
 String str_copy(String s, Arena *arena);
 String str_copy_into(String src, String *dest);
@@ -37,7 +37,7 @@ String str_to_lower(String s, Arena *arena);
 String str_to_upper(String s, Arena *arena);
 String str_join(StringArray arr, String delimiter, Arena *arena);
 StringArray str_split(String s, String delimiter, Arena *arena);
-void str_print(String s);
+void print_str(String s, bool nl);
 
 // @StringArray ================================================================================
 
@@ -45,6 +45,7 @@ struct StringArray
 {
   String *e;
   u64 count;
+  u64 capacity;
 };
 
 StringArray create_str_array(u64 count, Arena *arena);
@@ -52,5 +53,5 @@ void clear_str_array(StringArray *arr, Arena *arena);
 
 // @CStr =======================================================================================
 
-u32 cstr_len(i8 *cstr);
-void cstr_copy(String *dest, i8 *src);
+u32 cstr_len(char *cstr);
+void cstr_copy(String *dest, char *src);

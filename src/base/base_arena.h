@@ -12,7 +12,7 @@ typedef struct Arena Arena;
 struct Arena
 {
   Arena *prev;
-  byte *memory;
+  u8 *memory;
   u64 size;
   u64 used;
 };
