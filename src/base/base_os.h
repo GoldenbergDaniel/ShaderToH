@@ -17,12 +17,3 @@ void *os_alloc(u64 size);
 void *os_alloc_file(i32 file, u64 size, i32 offset);
 i32 os_set_prot(void *ptr, u64 size, i32 flags);
 void os_free(void *ptr, u64 size);
-
-// @Files ======================================================================
-
-typedef struct OS_File OS_File;
-struct OS_File
-{
-
-};
-

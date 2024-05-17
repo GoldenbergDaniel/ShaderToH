@@ -1,8 +1,7 @@
-// #define BACKEND_LIBC
-#define BACKEND_UNIX
+#define BACKEND_LIBC
+// #define BACKEND_UNIX
 
 #ifdef BACKEND_LIBC
-#include <stdio.h>
 #include <stdlib.h>
 #endif
 
@@ -19,7 +18,7 @@ void *os_alloc(u64 size)
   #ifdef BACKEND_LIBC
   return malloc(size);
   #endif
-
+  
   #ifdef BACKEND_UNIX
   i32 p_flags = PROT_READ | PROT_WRITE | PROT_EXEC;
   i32 m_flags = MAP_ANON | MAP_SHARED;
