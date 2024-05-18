@@ -55,7 +55,7 @@ i32 main(i32 argc, char **argv)
   // String output_path = str_nullify(str("..\\output\\shaders.h"), &arena);
 
   // Clear output
-  FILE *output_file = fopen(output_path.str, "w");
+  FILE *output_file = fopen(output_path.str, "wb");
   assert(output_file);
   fputs("", output_file);
   fputs("#pragma once\n\n", output_file);
@@ -66,12 +66,12 @@ i32 main(i32 argc, char **argv)
     String file_name = file_names.e[i];
     print_str(file_name, TRUE);
     String file_path = str_concat(input_path, file_name, &arena);
-    FILE *input_file = fopen(file_path.str, "r");
+    FILE *input_file = fopen(file_path.str, "rb");
     assert(input_file);
 
     String lines[MAX_LINES] = {0};
     read_file_into_array(input_file, lines, &arena);
-    output_file = freopen(output_path.str, "a", output_file);
+    output_file = freopen(output_path.str, "ab", output_file);
 
     u16 line_idx = 0;
 
