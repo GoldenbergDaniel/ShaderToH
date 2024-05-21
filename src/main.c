@@ -47,9 +47,7 @@ i32 main(i32 argc, char **argv)
   }
 
   String input_path = str_from_cstr(argv[1], &arena);
-  printf("%i\n", cstr_len(argv[2]));
   String output_path = str_from_cstr(argv[2], &arena);
-  print_str(output_path, 1);
 
   // String input_path = str_nullify(str("..\\input\\"), &arena);
   // String output_path = str_nullify(str("..\\output\\shaders.h"), &arena);
