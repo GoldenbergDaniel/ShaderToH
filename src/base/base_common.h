@@ -17,7 +17,11 @@ typedef double f64;
 #define TRUE 1
 #define FALSE 0
 
-#define THREAD_LOCAL __thread
+#ifdef _WIN32
+#define thread_local __declspec(thread)
+#elif
+#define thread_local __thread
+#endif
 
 #define arr_len(arr) (sizeof (arr) / sizeof (arr[0]))
 

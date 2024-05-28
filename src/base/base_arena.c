@@ -48,7 +48,7 @@ void *arena_alloc(Arena *arena, u64 size)
   assert(arena->size >= arena->used + size + ARENA_ALIGN_SIZE);
 
   u8 *allocated = arena->memory + arena->used;
-  i32 offset;
+  i32 offset = 0;
   allocated = _arena_align_ptr(allocated, ARENA_ALIGN_SIZE, &offset);
   arena->used += size + offset;
   
@@ -69,9 +69,9 @@ void arena_clear(Arena *arena)
 
 Arena arena_get_scratch(Arena *conflict)
 {
-  static THREAD_LOCAL Arena scratch_1;
-  static THREAD_LOCAL Arena scratch_2;
-  static THREAD_LOCAL bool init = TRUE;
+  thread_local static Arena scratch_1;
+  thread_local static Arena scratch_2;
+  thread_local static bool init = TRUE;
 
   if (init)
   {

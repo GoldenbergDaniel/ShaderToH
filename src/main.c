@@ -1,4 +1,9 @@
+#ifdef _WIN32
+#include <windows.h>
+#define _CRT_SECURE_NO_DEPRECATE
+#elif
 #include <dirent.h>
+#endif
 #include <stdio.h>
 #include <assert.h>
 
@@ -9,7 +14,7 @@
 #define MAX_FILES 64
 #define MAX_LINES 512
 #define BUF_SIZE 128
-
+ 
 typedef struct dirent DIRENT;
 
 static void read_file_into_array(FILE *file, String container[], Arena *arena);
@@ -21,7 +26,7 @@ static StringArray _file_names_from_dir_windows(String dir_name, String file_ext
 i32 main(i32 argc, char **argv)
 {
   Arena arena = arena_create(MiB(16));
-  arena_get_scratch(NULL);
+  // arena_get_scratch(NULL);
 
   if (argc < 3)
   {
@@ -44,11 +49,11 @@ i32 main(i32 argc, char **argv)
   String input_path = str_from_cstr(argv[1], &arena);
   String output_path = str_from_cstr(argv[2], &arena);
 
-  DIR *inputs_dir = opendir(input_path.str);
-  assert(inputs_dir);
+  // String input_path = str_nullify(str("..\\input\\"), &arena);
+  // String output_path = str_nullify(str("..\\output\\shaders.h"), &arena);
 
   // Clear output
-  FILE *output_file = fopen(output_path.str, "w");
+  FILE *output_file = fopen(output_path.str, "wb");
   assert(output_file);
   fputs("", output_file);
   fputs("#pragma once\n\n", output_file);
@@ -61,12 +66,12 @@ i32 main(i32 argc, char **argv)
     String file_name = file_names.e[i];
     printf(" %s\n", file_name.str);
     String file_path = str_concat(input_path, file_name, &arena);
-    FILE *input_file = fopen(file_path.str, "r");
+    FILE *input_file = fopen(file_path.str, "rb");
     assert(input_file);
 
     String lines[MAX_LINES] = {0};
     read_file_into_array(input_file, lines, &arena);
-    output_file = freopen(output_path.str, "a", output_file);
+    output_file = freopen(output_path.str, "ab", output_file);
 
     u16 line_idx = 0;
 
@@ -164,8 +169,6 @@ StringArray _file_names_from_dir_unix(String dir_name, String file_ext, Arena *a
 {
   Arena scratch = arena_get_scratch(arena);
   StringArray result = create_str_array(MAX_FILES, arena);
-
-  dir_name = str_nullify(dir_name, &scratch);
   DIR *dir = opendir(dir_name.str);
   assert(dir);
 
@@ -192,8 +195,27 @@ static
 StringArray _file_names_from_dir_windows(String dir_name, String file_ext, Arena *arena)
 {
   Arena scratch = arena_get_scratch(arena);
-  StringArray result = create_str_array(MAX_FILES, arena);
+  StringArray result = create_str_array(MAX_FILES, arena);  
+  String name_pattern = str_concat(str("*"), file_ext, arena);
+  String path = str_concat(dir_name, name_pattern, arena);
 
+  WIN32_FIND_DATA finder_data;
+  HANDLE finder = FindFirstFileA(path.str, &finder_data);
+  i32 file_count = 0;
+  if (finder != INVALID_HANDLE_VALUE)
+  {
+    do 
+    {
+      result.e[file_count] = str_from_cstr(finder_data.cFileName, arena);
+      file_count++;
+    }
+    while (FindNextFileA(finder, &finder_data));
+  }
+
+  FindClose(finder);
+
+  result.count = file_count;
+  
   return result;
 }
 #endif
