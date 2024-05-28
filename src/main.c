@@ -53,11 +53,13 @@ i32 main(i32 argc, char **argv)
   fputs("", output_file);
   fputs("#pragma once\n\n", output_file);
 
+  printf("Processing shaders...\n");
+
   StringArray file_names = file_names_from_dir(input_path, file_extension, &arena);
   for (i32 i = 0; i < file_names.count; i++)
   {
     String file_name = file_names.e[i];
-    print_str(file_name, TRUE);
+    printf(" %s\n", file_name.str);
     String file_path = str_concat(input_path, file_name, &arena);
     FILE *input_file = fopen(file_path.str, "r");
     assert(input_file);
