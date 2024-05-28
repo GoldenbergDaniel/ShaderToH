@@ -7,10 +7,10 @@ CFLAGS_D="-std=c17 -O0 -g -fsanitize=address -fsanitize=undefined"
 if [[ $MODE == "d" ]]
 then
   pushd debug
-  cc ../src/*.c ../src/base/*.c $CFLAGS_D -o $NAME
- `` ./$NAME
+  cc ../src/_target.c $CFLAGS_D -o $NAME
+  ./$NAME
   popd
 else
-  cc src/*.c src/base/*.c $CFLAGS -o $NAME
+  cc src/_target.c $CFLAGS -o $NAME
   mv -f $NAME ~/bin/
 fi

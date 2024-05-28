@@ -1,7 +1,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #define _CRT_SECURE_NO_DEPRECATE
-#elif
+#else
 #include <dirent.h>
 #endif
 #include <stdio.h>
@@ -48,9 +48,6 @@ i32 main(i32 argc, char **argv)
 
   String input_path = str_from_cstr(argv[1], &arena);
   String output_path = str_from_cstr(argv[2], &arena);
-
-  // String input_path = str_nullify(str("..\\input\\"), &arena);
-  // String output_path = str_nullify(str("..\\output\\shaders.h"), &arena);
 
   // Clear output
   FILE *output_file = fopen(output_path.str, "wb");

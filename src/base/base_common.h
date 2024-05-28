@@ -19,7 +19,7 @@ typedef double f64;
 
 #ifdef _WIN32
 #define thread_local __declspec(thread)
-#elif
+#else
 #define thread_local __thread
 #endif
 
